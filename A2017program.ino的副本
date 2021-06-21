@@ -1,0 +1,289 @@
+#include "LCD12864RSPI.h"
+#include <SoftwareSerial.h>
+unsigned char show0[]="                ";
+unsigned char show1[]="                ";
+unsigned char show2[]="                ";
+unsigned char show3[]="                ";
+
+//按键变量
+int key = 0; 
+int key_input = 0;
+//引脚定义
+int K1 = A0;
+int K2 = A1;
+int K3 = A2;
+int K4 = A3;
+int K5 = A4;
+int K6 = A5;
+int K7 = 2;
+int K8 = 13;
+int K9 = 12;
+int K10 = 11;
+int HC138_GND = 3;
+int HC138_A0 = 7;
+int HC138_A1 = 6;
+int HC138_A2 = 5;
+
+int mp3 = 0;
+int i = 0;
+
+//停止播放
+void play_stop()
+{
+      Serial.write(0x7E); //延时ms
+      Serial.write(0xFF); //延时ms
+      Serial.write(0x06); //延时ms
+      Serial.write(0x16); //延时ms
+      Serial.write(0x00); //延时ms
+      Serial.write(0x00); //延时ms
+      Serial.write(0x00);//延时ms
+      Serial.write(0xFE); //延时ms
+      Serial.write(0xE5);//延时ms
+      Serial.write(0xEF); //延时ms
+}
+//开始播放
+void play_mp3(unsigned char cmd)
+{
+    Serial.write(0x7E);
+    Serial.write(0xFF);
+    Serial.write(0x06);
+    Serial.write(0x12);
+    Serial.write(0x00);
+    Serial.write(0x00);
+    Serial.write(cmd);
+    Serial.write(0xFE);
+    switch(cmd)
+    {
+        case 1: Serial.write(0xE8);  break;
+        case 2: Serial.write(0xE7);  break;
+        case 3: Serial.write(0xE6);  break;
+        case 4: Serial.write(0xE5);  break;
+        case 5: Serial.write(0xE4);  break;
+        case 6: Serial.write(0xE3);  break;
+        case 7: Serial.write(0xE2);  break;
+        case 8: Serial.write(0xE1);  break;
+        case 9: Serial.write(0xE0);  break;
+        case 10:Serial.write(0xDF);  break;
+        case 11:Serial.write(0xDE);  break;
+        case 12:Serial.write(0xDD);  break;
+        case 13:Serial.write(0xDC);  break;
+        case 14:Serial.write(0xDB);  break;
+        default: break;
+    }
+    Serial.write(0xEF);
+}
+//读取按键输入
+char read_key_input()
+{
+      //按键按下变量加
+      key = digitalRead(K1);  //读取引脚状态
+      if(key==0)
+      {
+           return 1;
+      }
+      
+      key = digitalRead(K2);  //读取引脚状态
+      if(key==0)
+      {
+           return 2;
+      }
+
+      key = digitalRead(K3);  //读取引脚状态
+      if(key==0)
+      {
+           return 3;
+      }
+
+      key = digitalRead(K4);  //读取引脚状态
+      if(key==0)
+      {
+           return 4;
+      }
+
+      key = digitalRead(K5);  //读取引脚状态
+      if(key==0)
+      {
+           return 5;
+      }
+
+      key = digitalRead(K6);  //读取引脚状态
+      if(key==0)
+      {
+           return 6;
+      }
+
+      key = digitalRead(K7);  //读取引脚状态
+      if(key==0)
+      {
+           return 7;
+      }
+
+      key = digitalRead(K8);  //读取引脚状态
+      if(key==0)
+      {
+           return 8;
+      }
+
+      key = digitalRead(K9);  //读取引脚状态
+      if(key==0)
+      {
+           return 9;
+      }
+
+      key = digitalRead(K10);  //读取引脚状态
+      if(key==0)
+      {
+           return 10;
+      }
+
+      return 0;
+}
+//读取按键并通过调用调节当前系统状态
+void read_key()
+{
+    key_input = read_key_input();  //读取引脚状态
+    if(key_input==9)
+    {
+        mp3++;
+        if(mp3>2)
+        {
+            mp3 = 0;  
+        }  
+        
+        play_mp3(10+mp3);        
+    }
+    //停止播放
+    if(key_input==10)
+    {
+        play_stop(); //停止播放
+    }
+    
+    if((key_input>0)&&(key_input<=8))
+    {
+        digitalWrite(HC138_GND, LOW);
+        play_mp3(key_input);   //播放音阶
+    }
+    else
+    {
+        digitalWrite(HC138_GND, HIGH);  
+    }
+    
+    if(key_input==1)
+    {
+       digitalWrite(HC138_A0, LOW);
+       digitalWrite(HC138_A1, LOW);
+       digitalWrite(HC138_A2, LOW);
+    }
+    else if(key_input==2)
+    {
+       digitalWrite(HC138_A0, HIGH);
+       digitalWrite(HC138_A1, LOW);
+       digitalWrite(HC138_A2, LOW);
+    }
+    else if(key_input==3)
+    {
+       digitalWrite(HC138_A0, LOW);
+       digitalWrite(HC138_A1, HIGH);
+       digitalWrite(HC138_A2, LOW);
+    }
+    else if(key_input==4)
+    {
+       digitalWrite(HC138_A0, HIGH);
+       digitalWrite(HC138_A1, HIGH);
+       digitalWrite(HC138_A2, LOW);
+    }
+    else if(key_input==5)
+    {
+       digitalWrite(HC138_A0, LOW);
+       digitalWrite(HC138_A1, LOW);
+       digitalWrite(HC138_A2, HIGH);
+    }
+    else if(key_input==6)
+    {
+       digitalWrite(HC138_A0, HIGH);
+       digitalWrite(HC138_A1, LOW);
+       digitalWrite(HC138_A2, HIGH);
+    }    
+    else if(key_input==7)
+    {
+       digitalWrite(HC138_A0, LOW);
+       digitalWrite(HC138_A1, HIGH);
+       digitalWrite(HC138_A2, HIGH);
+    }
+    else if(key_input==8)
+    {
+       digitalWrite(HC138_A0, HIGH);
+       digitalWrite(HC138_A1, HIGH);
+       digitalWrite(HC138_A2, HIGH);
+    }
+}
+//调节液晶显示
+void display()
+{   
+    show0[0] = 'A';
+    show0[1] = 'r';
+    show0[2] = 'd';
+    show0[3] = 'u';
+    show0[4] = 'i';
+    show0[5] = 'n';
+    show0[6] = 'o';
+    show0[7] = ' ';
+    show0[8] = 0xD2;
+    show0[9] = 0xF4;
+    show0[10] = 0xC0;
+    show0[11] = 0xD6;
+    LCDA.DisplayString(0,0,show0,16);
+    
+    show2[0] = 0xB8;
+    show2[1] = 0xE8;
+    show2[2] = 0xC7;
+    show2[3] = 0xFA;
+    show2[4] =':';
+    show2[5] ='1'+ mp3;
+
+    LCDA.DisplayString(2,0,show2,16);         
+}
+//接收中断
+void serialEvent() 
+{
+  while (Serial.available()) {
+    // 获取新的字符:
+            char rec = (char)Serial.read();   //接收数据
+    }
+}   
+//初始化部分
+void setup()
+{
+   delay(1000);
+   Serial.begin(9600);
+   Serial.println("AT+RST");
+   //定义4个按键为输入
+   pinMode(K1, INPUT);
+   pinMode(K2, INPUT);
+   pinMode(K3, INPUT);
+   pinMode(K4, INPUT);
+   pinMode(K5, INPUT);
+   pinMode(K6, INPUT);
+   pinMode(K7, INPUT);
+   pinMode(K8, INPUT);
+   pinMode(K9, INPUT);
+   pinMode(K10, INPUT);
+
+   pinMode(HC138_GND,OUTPUT);
+   pinMode(HC138_A0,OUTPUT);
+   pinMode(HC138_A1,OUTPUT);
+   pinMode(HC138_A2,OUTPUT);
+   
+   LCDA.Initialise(); // 屏幕初始化
+   delay(100);
+}
+//循环部分
+void loop()
+{
+    read_key();
+   
+    display();    //显示   
+
+    delay(100);    //延时0.5s 防止程序执行过快   
+}
+
