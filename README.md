@@ -1,7 +1,11 @@
 # MusicBoard_pcbdesign
-a pcb design of music board
+A pcb design of music board
+  
 
-the outlook of my design
 
+It can play several musics and the Octave througn buttons.
+## the outlook of my design
+  
+  
+![整体.jpg](https://i.loli.net/2021/06/21/tNZsWlhqipR7yCA.jpg :50%)
 
-![整体.jpg](https://i.loli.net/2021/06/21/tNZsWlhqipR7yCA.jpg)
